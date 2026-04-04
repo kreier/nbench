@@ -25,6 +25,9 @@
 ** this code.
 */
 
+#ifndef NMGLOBAL_H
+#define NMGLOBAL_H
+
 /* is this a 64 bit architecture? If so, this will define LONG64 */
 #include "pointer.h"
 
@@ -516,4 +519,6 @@ typedef struct {
         ulong numarrays;        /* # of arrays */
         double iterspersec;     /* Results */
 } LUStruct;
+
+#endif /* NMGLOBAL_H */
 

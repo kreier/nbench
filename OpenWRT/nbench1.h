@@ -199,8 +199,8 @@ static double thefunction(double x,
 ** DEFINES
 */
 
-#define ASSIGNROWS 101L
-#define ASSIGNCOLS 101L
+#define ASSIGNROWS 20L
+#define ASSIGNCOLS 20L
 
 /*
 ** TYPEDEFS
