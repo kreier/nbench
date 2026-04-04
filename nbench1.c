@@ -1705,6 +1705,10 @@ locassignstruct=&global_assignstruct;
 */
 errorcontext="CPU:Assignment";
 
+/* fprintf(stdout, "  [DOASSIGN] Starting: adjust=%d, numarrays=%lu, request_secs=%lu\n",
+    locassignstruct->adjust, locassignstruct->numarrays, locassignstruct->request_secs);
+fflush(stdout); */
+
 /*
 ** See if we need to do self adjustment code.
 */
@@ -1917,19 +1921,37 @@ return;
 static void Assignment(farlong arraybase[][ASSIGNCOLS])
 {
 short assignedtableau[ASSIGNROWS][ASSIGNCOLS];
+int loop_count = 0;
 
 /*
 ** First, calculate minimum costs
 */
+/* fprintf(stdout, "  [ASSIGNMENT] Starting calc_minimum_costs...\n");
+fflush(stdout); */
 calc_minimum_costs(arraybase);
+/* fprintf(stdout, "  [ASSIGNMENT] calc_minimum_costs completed\n");
+fflush(stdout); */
 
 /*
 ** Repeat following until the number of rows selected
 ** equals the number of rows in the tableau.
 */
+/* fprintf(stdout, "  [ASSIGNMENT] Starting assignment loop...\n");
+fflush(stdout); */
 while(first_assignments(arraybase,assignedtableau)!=ASSIGNROWS)
-{         second_assignments(arraybase,assignedtableau);
+{
+    loop_count++;
+    /* fprintf(stdout, "  [ASSIGNMENT] Loop iteration %d, calling second_assignments...\n", loop_count);
+    fflush(stdout); */
+    second_assignments(arraybase,assignedtableau);
+    if (loop_count > 100) {  // Safety check to prevent infinite loop
+        /* fprintf(stdout, "  [ASSIGNMENT] ERROR: Too many iterations (%d), breaking\n", loop_count);
+        fflush(stdout); */
+        break;
+    }
 }
+/* fprintf(stdout, "  [ASSIGNMENT] Assignment loop completed after %d iterations\n", loop_count);
+fflush(stdout); */
 
 #ifdef DEBUG
 {
@@ -2017,11 +2039,12 @@ return;
 static int first_assignments(long tableau[][ASSIGNCOLS],
 		short assignedtableau[][ASSIGNCOLS])
 {
-ushort i,j,k;                   /* Index variables */
-ushort numassigns;              /* # of assignments */
-ushort totnumassigns;           /* Total # of assignments */
-ushort numzeros;                /* # of zeros in row */
+/* ushort i,j,k; */                   /* Index variables */
+/* ushort numassigns; */              /* # of assignments */
+/* ushort totnumassigns; */           /* Total # of assignments */
+/* ushort numzeros; */                /* # of zeros in row */
 int selected=0;                 /* Flag used to indicate selection */
+int do_loop_count = 0;
 
 /*
 ** Clear the assignedtableau, setting all members to show that
@@ -2032,8 +2055,16 @@ for(i=0;i<ASSIGNROWS;i++)
 		assignedtableau[i][j]=0;
 
 totnumassigns=0;
+/* fprintf(stdout, "  [FIRST_ASSIGNMENTS] Starting do-while loop...\n");
+fflush(stdout); */
 do {
 	numassigns=0;
+	do_loop_count++;
+	if (do_loop_count > 1000) {  // Safety check
+		/* fprintf(stdout, "  [FIRST_ASSIGNMENTS] ERROR: Too many do-while iterations (%d)\n", do_loop_count);
+		fflush(stdout); */
+		break;
+	}
 	/*
 	** Step through rows.  For each one that is not currently
 	** assigned, see if the row has only one zero in it.  If so,
@@ -2084,6 +2115,8 @@ do {
 	** Repeat until no more assignments to be made.
 	*/
 } while(numassigns!=0);
+/* fprintf(stdout, "  [FIRST_ASSIGNMENTS] do-while loop completed after %d iterations, totnumassigns=%d\n", do_loop_count, totnumassigns);
+fflush(stdout); */
 
 /*
 ** See if we can leave at this point.
@@ -2118,6 +2151,8 @@ for(i=0;i<ASSIGNROWS;i++)
 	}
 }
 
+/* fprintf(stdout, "  [FIRST_ASSIGNMENTS] Returning %d\n", totnumassigns);
+fflush(stdout); */
 return(totnumassigns);
 }
 
@@ -2138,9 +2173,9 @@ short linescol[ASSIGNCOLS];
 long smallest;                          /* Holds smallest value */
 ushort numassigns;                      /* Number of assignments */
 ushort newrows;                         /* New rows to be considered */
-/*
-** Clear the linesrow and linescol arrays.
-*/
+
+/* fprintf(stdout, "  [SECOND_ASSIGNMENTS] Starting...\n");
+fflush(stdout); */
 for(i=0;i<ASSIGNROWS;i++)
 	linesrow[i]=0;
 for(i=0;i<ASSIGNCOLS;i++)
@@ -2220,6 +2255,8 @@ for(i=0;i<ASSIGNROWS;i++)
 			if(linescol[j]==1)
 				tableau[i][j]+=smallest;
 
+/* fprintf(stdout, "  [SECOND_ASSIGNMENTS] Completed\n");
+fflush(stdout); */
 return;
 }
 
