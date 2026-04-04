@@ -51,10 +51,13 @@
 #include <string.h>
 #include <time.h>
 #include <math.h>
-#include "nmglobal.h"
 #include "nbench0.h"
 #include "sysspec.h"
 #include "hardware.h"
+
+extern unsigned long StartStopwatch(void);
+extern unsigned long StopStopwatch(unsigned long startticks);
+extern double TicksToFracSecs(unsigned long tickamount);
 
 /*************
 **** main ****
