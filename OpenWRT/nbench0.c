@@ -136,6 +136,11 @@ for(i=0;i<NUMTESTS;i++)
         step_elapsed_secs[i]=(double)0.0;
 }
 
+/* Disable assignment test on MIPS due to hanging issue */
+#if defined(__mips__) || defined(_MIPS_ISA_MIPS)
+tests_to_do[TF_ASSIGN] = 0;
+#endif
+
 /*
 ** Initialize test data structures to default
 ** values.
@@ -249,6 +254,7 @@ for(i=0;i<NUMTESTS;i++)
         if(tests_to_do[i])
         {       sprintf(buffer,"%s    :",ftestnames[i]);
                                 output_string(buffer);
+                fflush(stdout);  /* Force output to show current test */
                 step_start_ticks=StartStopwatch();
                 if (0!=bench_with_confidence(i,
                         &bmean,

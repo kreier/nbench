@@ -4,7 +4,7 @@ The benchmark can be easily crosscompiled, you just have to change the compiler 
 
 ## Workaround
 
-Fix to run on a router with OpenWRT ... TBD.
+The assignment test is now automatically disabled on MIPS builds to prevent hanging. The code checks for `__mips__` or `_MIPS_ISA_MIPS` defines and skips the assignment test.
 
 ## Compile on OpenWRT with the SDK and toolchain
 

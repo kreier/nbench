@@ -252,7 +252,10 @@ output_string("--------------------:------------------:-------------:-----------
 for(i=0;i<NUMTESTS;i++)
 {
         if(tests_to_do[i])
-        {       sprintf(buffer,"%s    :",ftestnames[i]);
+        {       /* Add debug output to identify which test is running */
+                fprintf(stdout, "\n[DEBUG] Starting test %d: %s\n", i, ftestnames[i]);
+                fflush(stdout);
+                sprintf(buffer,"%s    :",ftestnames[i]);
                                 output_string(buffer);
                 step_start_ticks=StartStopwatch();
                 if (0!=bench_with_confidence(i,
@@ -799,8 +802,12 @@ int i;                          /* Index */
 ** Get first 5 scores.  Then begin confidence testing.
 */
 for (i=0;i<5;i++)
-{       (*funcpointer[fid])();
+{       fprintf(stdout, "  [DEBUG] Run %d of 5+ (fid=%d)...\n", i+1, fid);
+        fflush(stdout);
+        (*funcpointer[fid])();
         myscores[i]=getscore(fid);
+        fprintf(stdout, "  [DEBUG] Run %d completed, score=%g\n", i+1, myscores[i]);
+        fflush(stdout);
 #ifdef DEBUG
 	printf("score # %d = %g\n", i, myscores[i]);
 #endif
@@ -855,8 +862,12 @@ while(1)
 	/* We now simply add a new test run and hope that the runs
            finally stabilize, Uwe F. Mayer */
 	if(*numtries==30) return(-1);
+	fprintf(stdout, "  [DEBUG] Additional run, attempt %lu of 30 (fid=%d)...\n", *numtries+1, fid);
+	fflush(stdout);
 	(*funcpointer[fid])();
 	myscores[*numtries]=getscore(fid);
+	fprintf(stdout, "  [DEBUG] Run %lu completed, score=%g\n", *numtries+1, myscores[*numtries]);
+	fflush(stdout);
 #ifdef DEBUG
 	printf("score # %ld = %g\n", *numtries, myscores[*numtries]);
 #endif
