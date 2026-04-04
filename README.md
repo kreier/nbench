@@ -1,6 +1,6 @@
 # nbench
 
-![GitHub License](https://img.shields.io/github/license/kreier/nbench)
+![GitHub License](https://img.shields.io/github/license/kreier/nbench?style=flat)
 ![GitHub Release](https://img.shields.io/github/v/release/kreier/nbench)
 
 ## February 18, 2003
