@@ -19,7 +19,8 @@ default: nbench
 # You should leave -static in the CFLAGS so that your sysinfo can be
 # compiled into the executable.
 
-CC = gcc
+# CC = gcc
+CC = mips-openwrt-linux-musl-gcc
 
 # generic options for gcc
 CFLAGS = -s -static -Wall -O3

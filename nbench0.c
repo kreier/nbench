@@ -53,7 +53,12 @@
 #include <math.h>
 #include "nmglobal.h"
 #include "nbench0.h"
+#include "sysspec.h"
 #include "hardware.h"
+
+extern unsigned long StartStopwatch(void);
+extern unsigned long StopStopwatch(unsigned long startticks);
+extern double TicksToFracSecs(unsigned long tickamount);
 
 /*************
 **** main ****
@@ -75,6 +80,9 @@ double lx_fpindex;      /* Linux floating-point index */
 double intindex;        /* Integer index */
 double fpindex;         /* Floating-point index */
 ulong bnumrun;          /* # of runs */
+ulong step_elapsed_ticks[NUMTESTS]; /* Elapsed ticks for each benchmark step */
+double step_elapsed_secs[NUMTESTS]; /* Elapsed seconds for each benchmark step */
+ulong step_start_ticks; /* Stopwatch value for current benchmark step */
 
 #ifdef MAC
         MaxApplZone();
@@ -127,7 +135,11 @@ mem_array_ents=0;               /* Nothing in mem array */
 ** otherwise
 */
 for(i=0;i<NUMTESTS;i++)
+{
         tests_to_do[i]=1;
+        step_elapsed_ticks[i]=0L;
+        step_elapsed_secs[i]=(double)0.0;
+}
 
 /*
 ** Initialize test data structures to default
@@ -240,8 +252,12 @@ output_string("--------------------:------------------:-------------:-----------
 for(i=0;i<NUMTESTS;i++)
 {
         if(tests_to_do[i])
-        {       sprintf(buffer,"%s    :",ftestnames[i]);
+        {       /* Add debug output to identify which test is running */
+                fprintf(stdout, "\n[DEBUG] Starting test %d: %s\n", i, ftestnames[i]);
+                fflush(stdout);
+                sprintf(buffer,"%s    :",ftestnames[i]);
                                 output_string(buffer);
+                step_start_ticks=StartStopwatch();
                 if (0!=bench_with_confidence(i,
                         &bmean,
                         &bstdev,
@@ -250,6 +266,8 @@ for(i=0;i<NUMTESTS;i++)
 		  output_string("** WARNING: The variation among the individual results is too large.\n");
 		  output_string("                    :");
 		}
+                step_elapsed_ticks[i]=StopStopwatch(step_start_ticks);
+                step_elapsed_secs[i]=TicksToFracSecs(step_elapsed_ticks[i]);
 #ifdef LINUX
                 sprintf(buffer," %15.5g  :  %9.2f  :  %9.2f\n",
                         bmean,bmean/bindex[i],bmean/lx_bindex[i]);
@@ -280,6 +298,9 @@ for(i=0;i<NUMTESTS;i++)
 
                 if(global_allstats)
                 {
+                        sprintf(buffer,"  Elapsed time: %.3f sec\n",
+                                step_elapsed_secs[i]);
+                        output_string(buffer);
                         sprintf(buffer,"  Absolute standard deviation: %g\n",bstdev);
                         output_string(buffer);
 			if (bmean>(double)1e-100){
@@ -295,6 +316,19 @@ for(i=0;i<NUMTESTS;i++)
                         output_string(buffer);
                 }
         }
+}
+
+if(global_allstats)
+{
+        output_string("Benchmark step timing summary:\n");
+        for(i=0;i<NUMTESTS;i++)
+                if(tests_to_do[i])
+                {
+                        sprintf(buffer,"  %2d. %s : %.3f sec\n",
+                                i+1, ftestnames[i], step_elapsed_secs[i]);
+                        output_string(buffer);
+                }
+        output_string("\n");
 }
 /* printf("...done...\n"); */
 
@@ -768,8 +802,12 @@ int i;                          /* Index */
 ** Get first 5 scores.  Then begin confidence testing.
 */
 for (i=0;i<5;i++)
-{       (*funcpointer[fid])();
+{       fprintf(stdout, "  [DEBUG] Run %d of 5+ (fid=%d)...\n", i+1, fid);
+        fflush(stdout);
+        (*funcpointer[fid])();
         myscores[i]=getscore(fid);
+        fprintf(stdout, "  [DEBUG] Run %d completed, score=%g\n", i+1, myscores[i]);
+        fflush(stdout);
 #ifdef DEBUG
 	printf("score # %d = %g\n", i, myscores[i]);
 #endif
@@ -824,8 +862,12 @@ while(1)
 	/* We now simply add a new test run and hope that the runs
            finally stabilize, Uwe F. Mayer */
 	if(*numtries==30) return(-1);
+	fprintf(stdout, "  [DEBUG] Additional run, attempt %lu of 30 (fid=%d)...\n", *numtries+1, fid);
+	fflush(stdout);
 	(*funcpointer[fid])();
 	myscores[*numtries]=getscore(fid);
+	fprintf(stdout, "  [DEBUG] Run %lu completed, score=%g\n", *numtries+1, myscores[*numtries]);
+	fflush(stdout);
 #ifdef DEBUG
 	printf("score # %ld = %g\n", *numtries, myscores[*numtries]);
 #endif
