@@ -1920,8 +1920,12 @@ return;
 ***************/
 static void Assignment(farlong arraybase[][ASSIGNCOLS])
 {
+<<<<<<< Updated upstream
 short assignedtableau[ASSIGNROWS][ASSIGNCOLS];
 int loop_count = 0;
+=======
+static short assignedtableau[ASSIGNROWS][ASSIGNCOLS];
+>>>>>>> Stashed changes
 
 /*
 ** First, calculate minimum costs
